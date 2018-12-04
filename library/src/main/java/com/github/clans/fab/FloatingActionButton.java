@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
@@ -36,7 +37,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class FloatingActionButton extends ImageButton {
+public class FloatingActionButton extends CheckableImageButton {
 
     public static final int SIZE_NORMAL = 0;
     public static final int SIZE_MINI = 1;
@@ -56,6 +57,7 @@ public class FloatingActionButton extends ImageButton {
     private int mColorNormal;
     private int mColorPressed;
     private int mColorDisabled;
+    private int mColorChecked;
     private int mColorRipple;
     private Drawable mIcon;
     private int mIconSize = Util.dpToPx(getContext(), 24f);
@@ -118,6 +120,7 @@ public class FloatingActionButton extends ImageButton {
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         TypedArray attr = context.obtainStyledAttributes(attrs, R.styleable.FloatingActionButton, defStyleAttr, 0);
         mColorNormal = attr.getColor(R.styleable.FloatingActionButton_fab_colorNormal, 0xFFDA4336);
+        mColorChecked = attr.getColor(R.styleable.FloatingActionButton_fab_colorNormal, 0xFFDA4336);
         mColorPressed = attr.getColor(R.styleable.FloatingActionButton_fab_colorPressed, 0xFFE75043);
         mColorDisabled = attr.getColor(R.styleable.FloatingActionButton_fab_colorDisabled, 0xFFAAAAAA);
         mColorRipple = attr.getColor(R.styleable.FloatingActionButton_fab_colorRipple, 0x99FFFFFF);
@@ -376,6 +379,7 @@ public class FloatingActionButton extends ImageButton {
                 circleInsetHorizontal,
                 circleInsetVertical
         );*/
+
         layerDrawable.setLayerInset(
                 hasShadow() ? 2 : 1,
                 circleInsetHorizontal + iconOffset,
@@ -400,6 +404,7 @@ public class FloatingActionButton extends ImageButton {
         StateListDrawable drawable = new StateListDrawable();
         drawable.addState(new int[]{-android.R.attr.state_enabled}, createCircleDrawable(mColorDisabled));
         drawable.addState(new int[]{android.R.attr.state_pressed}, createCircleDrawable(mColorPressed));
+        drawable.addState(new int[]{android.R.attr.checked}, createCircleDrawable(mColorChecked));
         drawable.addState(new int[]{}, createCircleDrawable(mColorNormal));
 
         if (Util.hasLollipop()) {
@@ -511,9 +516,10 @@ public class FloatingActionButton extends ImageButton {
         return (Label) getTag(R.id.fab_label);
     }
 
-    void setColors(int colorNormal, int colorPressed, int colorRipple) {
+    void setColors(int colorNormal, int colorPressed, int colorChecked, int colorRipple) {
         mColorNormal = colorNormal;
         mColorPressed = colorPressed;
+        mColorChecked = colorChecked;
         mColorRipple = colorRipple;
     }
 
@@ -712,7 +718,7 @@ public class FloatingActionButton extends ImageButton {
 
         @Override
         public int getOpacity() {
-            return 0;
+            return PixelFormat.UNKNOWN;
         }
     }
 
@@ -851,6 +857,21 @@ public class FloatingActionButton extends ImageButton {
 
     public void setColorNormalResId(int colorResId) {
         setColorNormal(getResources().getColor(colorResId));
+    }
+
+    public int getColorChecked() {
+        return mColorChecked;
+    }
+
+    public void setColorChecked(int color) {
+        if (mColorChecked != color) {
+            mColorChecked = color;
+            updateBackground();
+        }
+    }
+
+    public void setColorCheckedResId(int colorResId) {
+        setColorChecked(getResources().getColor(colorResId));
     }
 
     public int getColorNormal() {
